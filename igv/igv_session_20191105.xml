@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Session genome="/home/trey/scratch/libraries/genome/sagalactiae_a909.fasta" hasGeneTrack="false" hasSequenceTrack="true" locus="NC_007432:334455-345289" path="/home/trey/scratch/tnseq/sagalacticae_2019/igv/igv_session_20191105.xml" version="8">
+    <Resources>
+        <Resource path="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/01/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam"/>
+        <Resource path="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/06/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam"/>
+        <Resource path="/home/trey/scratch/libraries/genome/sagalactiae_a909.gff"/>
+        <Resource path="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/02/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam"/>
+        <Resource path="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/05/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam"/>
+        <Resource path="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/08/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam"/>
+        <Resource path="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/03/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam"/>
+        <Resource path="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/04/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam"/>
+        <Resource path="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/07/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam"/>
+        <Resource path="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/09/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam"/>
+    </Resources>
+    <Panel height="75" name="FeaturePanel" width="3821">
+        <Track clazz="org.broad.igv.track.SequenceTrack" fontSize="10" id="Reference sequence" name="Reference sequence" visible="true"/>
+        <Track clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" displayMode="EXPANDED" fontSize="10" id="/home/trey/scratch/libraries/genome/sagalactiae_a909.gff" name="sagalactiae_a909.gff" visible="true"/>
+    </Panel>
+    <Panel height="4062" name="Panel1572966395057" width="3821">
+        <Track autoScale="true" clazz="org.broad.igv.sam.CoverageTrack" color="175,175,175" colorScale="ContinuousColorScale;0.0;1534.0;255,255,255;175,175,175" fontSize="10" id="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/01/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam_coverage" name="control01" snpThreshold="0.2" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="5188.0" minimum="0.0" type="LOG"/>
+        </Track>
+        <Track clazz="org.broad.igv.sam.SpliceJunctionTrack" fontSize="10" height="60" id="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/01/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam_junctions" name="trimmed_ca-v0M1.bam Junctions" visible="false"/>
+        <Track clazz="org.broad.igv.sam.AlignmentTrack" displayMode="EXPANDED" experimentType="OTHER" fontSize="10" id="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/01/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam" name="trimmed_ca-v0M1.bam" visible="true">
+            <RenderOptions/>
+        </Track>
+    </Panel>
+    <Panel height="4202" name="Panel1572966565594" width="3821">
+        <Track autoScale="true" clazz="org.broad.igv.sam.CoverageTrack" color="175,175,175" colorScale="ContinuousColorScale;0.0;12073.0;255,255,255;175,175,175" fontSize="10" id="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/02/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam_coverage" name="control02" snpThreshold="0.2" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="5173.0" minimum="0.0" type="LOG"/>
+        </Track>
+        <Track clazz="org.broad.igv.sam.SpliceJunctionTrack" fontSize="10" height="60" id="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/02/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam_junctions" name="trimmed_ca-v0M1.bam Junctions" visible="false"/>
+        <Track clazz="org.broad.igv.sam.AlignmentTrack" displayMode="EXPANDED" experimentType="OTHER" fontSize="10" id="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/02/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam" name="trimmed_ca-v0M1.bam" visible="true">
+            <RenderOptions/>
+        </Track>
+    </Panel>
+    <Panel height="4370" name="Panel1572966595356" width="3821">
+        <Track autoScale="true" clazz="org.broad.igv.sam.CoverageTrack" color="175,175,175" colorScale="ContinuousColorScale;0.0;1879.0;255,255,255;175,175,175" fontSize="10" id="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/03/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam_coverage" name="control03" snpThreshold="0.2" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="6009.0" minimum="0.0" type="LOG"/>
+        </Track>
+        <Track clazz="org.broad.igv.sam.SpliceJunctionTrack" fontSize="10" height="60" id="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/03/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam_junctions" name="trimmed_ca-v0M1.bam Junctions" visible="false"/>
+        <Track clazz="org.broad.igv.sam.AlignmentTrack" displayMode="EXPANDED" experimentType="OTHER" fontSize="10" id="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/03/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam" name="trimmed_ca-v0M1.bam" visible="true">
+            <RenderOptions/>
+        </Track>
+    </Panel>
+    <Panel height="4328" name="Panel1572966612788" width="3821">
+        <Track autoScale="true" clazz="org.broad.igv.sam.CoverageTrack" color="175,175,175" colorScale="ContinuousColorScale;0.0;2756.0;255,255,255;175,175,175" fontSize="10" id="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/04/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam_coverage" name="cal_low01" snpThreshold="0.2" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="8481.0" minimum="0.0" type="LOG"/>
+        </Track>
+        <Track clazz="org.broad.igv.sam.SpliceJunctionTrack" fontSize="10" height="60" id="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/04/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam_junctions" name="trimmed_ca-v0M1.bam Junctions" visible="false"/>
+        <Track clazz="org.broad.igv.sam.AlignmentTrack" displayMode="EXPANDED" experimentType="OTHER" fontSize="10" id="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/04/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam" name="trimmed_ca-v0M1.bam" visible="true">
+            <RenderOptions/>
+        </Track>
+    </Panel>
+    <Panel height="3992" name="Panel1572966632521" width="3821">
+        <Track autoScale="true" clazz="org.broad.igv.sam.CoverageTrack" color="175,175,175" colorScale="ContinuousColorScale;0.0;2513.0;255,255,255;175,175,175" fontSize="10" id="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/05/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam_coverage" name="cal_low_02" snpThreshold="0.2" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="7905.0" minimum="0.0" type="LOG"/>
+        </Track>
+        <Track clazz="org.broad.igv.sam.SpliceJunctionTrack" fontSize="10" height="60" id="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/05/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam_junctions" name="trimmed_ca-v0M1.bam Junctions" visible="false"/>
+        <Track clazz="org.broad.igv.sam.AlignmentTrack" displayMode="EXPANDED" experimentType="OTHER" fontSize="10" id="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/05/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam" name="trimmed_ca-v0M1.bam" visible="true">
+            <RenderOptions/>
+        </Track>
+    </Panel>
+    <Panel height="4426" name="Panel1572966643111" width="3821">
+        <Track autoScale="true" clazz="org.broad.igv.sam.CoverageTrack" color="175,175,175" colorScale="ContinuousColorScale;0.0;2481.0;255,255,255;175,175,175" fontSize="10" id="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/06/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam_coverage" name="cal_low03" snpThreshold="0.2" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="8176.0" minimum="0.0" type="LOG"/>
+        </Track>
+        <Track clazz="org.broad.igv.sam.SpliceJunctionTrack" fontSize="10" height="60" id="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/06/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam_junctions" name="trimmed_ca-v0M1.bam Junctions" visible="false"/>
+        <Track clazz="org.broad.igv.sam.AlignmentTrack" displayMode="EXPANDED" experimentType="OTHER" fontSize="10" id="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/06/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam" name="trimmed_ca-v0M1.bam" visible="true">
+            <RenderOptions/>
+        </Track>
+    </Panel>
+    <Panel height="4510" name="Panel1572966653012" width="3821">
+        <Track autoScale="true" clazz="org.broad.igv.sam.CoverageTrack" color="175,175,175" colorScale="ContinuousColorScale;0.0;2914.0;255,255,255;175,175,175" fontSize="10" id="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/07/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam_coverage" name="cal_high01" snpThreshold="0.2" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="6896.0" minimum="0.0" type="LOG"/>
+        </Track>
+        <Track clazz="org.broad.igv.sam.SpliceJunctionTrack" fontSize="10" height="60" id="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/07/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam_junctions" name="trimmed_ca-v0M1.bam Junctions" visible="false"/>
+        <Track clazz="org.broad.igv.sam.AlignmentTrack" displayMode="EXPANDED" experimentType="OTHER" fontSize="10" id="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/07/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam" name="trimmed_ca-v0M1.bam" visible="true">
+            <RenderOptions/>
+        </Track>
+    </Panel>
+    <Panel height="4300" name="Panel1572966664096" width="3821">
+        <Track autoScale="true" clazz="org.broad.igv.sam.CoverageTrack" color="175,175,175" colorScale="ContinuousColorScale;0.0;2258.0;255,255,255;175,175,175" fontSize="10" id="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/08/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam_coverage" name="cal_high02" snpThreshold="0.2" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="6389.0" minimum="0.0" type="LOG"/>
+        </Track>
+        <Track clazz="org.broad.igv.sam.SpliceJunctionTrack" fontSize="10" height="60" id="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/08/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam_junctions" name="trimmed_ca-v0M1.bam Junctions" visible="false"/>
+        <Track clazz="org.broad.igv.sam.AlignmentTrack" displayMode="EXPANDED" experimentType="OTHER" fontSize="10" id="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/08/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam" name="trimmed_ca-v0M1.bam" visible="true">
+            <RenderOptions/>
+        </Track>
+    </Panel>
+    <Panel height="4118" name="Panel1572966674247" width="3821">
+        <Track autoScale="true" clazz="org.broad.igv.sam.CoverageTrack" color="175,175,175" colorScale="ContinuousColorScale;0.0;2913.0;255,255,255;175,175,175" fontSize="10" id="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/09/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam_coverage" name="cal_high03" snpThreshold="0.2" visible="true">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="6992.0" minimum="0.0" type="LOG"/>
+        </Track>
+        <Track clazz="org.broad.igv.sam.SpliceJunctionTrack" fontSize="10" height="60" id="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/09/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam_junctions" name="trimmed_ca-v0M1.bam Junctions" visible="false"/>
+        <Track clazz="org.broad.igv.sam.AlignmentTrack" displayMode="EXPANDED" experimentType="OTHER" fontSize="10" id="/home/trey/scratch/tnseq/sagalacticae_2019/preprocessing/09/outputs/bowtie_sagalactiae_a909/trimmed_ca-v0M1.bam" name="trimmed_ca-v0M1.bam" visible="true">
+            <RenderOptions/>
+        </Track>
+    </Panel>
+    <PanelLayout dividerFractions="0.003116883116883117,0.04155844155844156,0.09610389610389611,0.1522077922077922,0.2109090909090909,0.26701298701298704,0.3246753246753247,0.3901298701298701,0.454025974025974,0.5142857142857142"/>
+    <HiddenAttributes>
+        <Attribute name="DATA FILE"/>
+        <Attribute name="DATA TYPE"/>
+        <Attribute name="NAME"/>
+    </HiddenAttributes>
+</Session>
