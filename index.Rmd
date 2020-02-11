@@ -1,0 +1,636 @@
+---
+title: "S. agalactiae 20191105: Poking at some TNSeq."
+author: "atb abelew@gmail.com"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    code_download: true
+    code_folding: show
+    fig_caption: true
+    fig_height: 7
+    fig_width: 7
+    highlight: tango
+    keep_md: false
+    mode: selfcontained
+    number_sections: true
+    self_contained: true
+    theme: readable
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+  rmdformats::readthedown:
+    code_download: true
+    code_folding: show
+    df_print: paged
+    fig_caption: true
+    fig_height: 7
+    fig_width: 7
+    highlight: tango
+    width: 300
+    keep_md: false
+    mode: selfcontained
+    toc_float: true
+  BiocStyle::html_document:
+    code_download: true
+    code_folding: show
+    fig_caption: true
+    fig_height: 7
+    fig_width: 7
+    highlight: tango
+    keep_md: false
+    mode: selfcontained
+    toc_float: true
+---
+
+<style type="text/css">
+body, td {
+  font-size: 16px;
+}
+code.r{
+  font-size: 16px;
+}
+pre {
+ font-size: 16px
+}
+</style>
+
+```{r options, include=FALSE}
+library("hpgltools")
+devtools::load_all("~/hpgltools")
+knitr::opts_knit$set(width=120,
+                     progress=TRUE,
+                     verbose=TRUE,
+                     echo=TRUE)
+knitr::opts_chunk$set(error=TRUE,
+                      dpi=96)
+old_options <- options(digits=4,
+                       stringsAsFactors=FALSE,
+                       knitr.duplicate.label="allow")
+ggplot2::theme_set(ggplot2::theme_bw(base_size=10))
+rundate <- format(Sys.Date(), format="%Y%m%d")
+previous_file <- ""
+ver <- "20191105"
+
+##tmp <- sm(loadme(filename=paste0(gsub(pattern="\\.Rmd", replace="", x=previous_file), "-v", ver, ".rda.xz")))
+##rmd_file <- "03_expression_infection_20180822.Rmd"
+```
+
+# TNSeq of S. agalacticae and 3 concentrations of calprotectin.
+
+This worksheet aims to lay out the tasks I performed when analyzing some TNSeq
+data of a group B streptococcus.
+
+# Three concentrations of calprotectin (none, 60, and 480 -- is this [mM], mg/mL, or what?)
+
+It looks to me, that despite the oddities in processing the raw reads, there is
+nice coverage and some obviously essential genes.  The next question: did any
+change status as more calprotectin was added?
+
+# Grab annotation data for Streptococcus agalactiae.
+
+The ID for strain a909 at microbesonline.org is: 205921.
+
+Let us load up annotations from my gff file along with the microbesonline.
+
+As a heads up, the count tables are using IDs which look like: SAK_RS00185.
+This appears to be the 'sysName' column from microbesonline and the locus_tag
+column from the gff annotations.  In addition, there are a bunch of unused
+columns in both data sets which we likely want to prune.
+
+Ahh, that is incorrect, the microbesonline 'sysName' is the same as
+'old_locus_tag' column.
+
+There are three relatively closely related strains which may be sufficiently
+similar to use in this analysis.  The _actual_ strain is cjb111, but that has
+not yet been quite finished, as far as I can tell.  Therefore I will repeat
+most(all?) tasks with strains a909 and vr2603 to see if they may be more useful.
+
+## Strain a909
+
+```{r annotations_a909}
+a909_microbes <- load_microbesonline_annotations(species="A909")
+a909_gff <- load_gff_annotations("reference/sagalactiae_a909_all.gff")
+a909_microbes <- as.data.frame(a909_microbes)
+rownames(a909_gff) <- make.names(a909_gff[["locus_tag"]], unique=TRUE)
+## I am going to only pay attention to the first annotation for each locus tag from microbesonline.
+a909_microbes[["sysName"]] <- make.names(a909_microbes[["sysName"]], unique=TRUE)
+a909_annot <- merge(a909_gff, a909_microbes, by.x="old_locus_tag", by.y="sysName")
+rownames(a909_annot) <- make.names(a909_annot[["locus_tag"]], unique=TRUE)
+## Rename the merged start/strand columns
+colnames(a909_annot)[3] <- "start"
+colnames(a909_annot)[6] <- "strand"
+## And drop the duplicates
+a909_annot[, c(39, 41)] <- NULL
+```
+
+## Strain cjb111
+
+```{r annotation_cjb111}
+cjb111_microbes <- load_microbesonline_annotations(species="CJB111")
+cjb111_gff <- load_gff_annotations("reference/sagalactiae_cjb111.gff")
+cjb111_microbes <- as.data.frame(cjb111_microbes)
+rownames(cjb111_gff) <- make.names(cjb111_gff[["locus_tag"]], unique=TRUE)
+## I am going to only pay attention to the first annotation for each locus tag from microbesonline.
+cjb111_microbes[["sysName"]] <- make.names(cjb111_microbes[["sysName"]], unique=TRUE)
+cjb111_annot <- merge(cjb111_gff, cjb111_microbes, by.x="locus_tag", by.y="sysName")
+rownames(cjb111_annot) <- make.names(cjb111_annot[["locus_tag"]], unique=TRUE)
+## Rename the merged start/strand columns
+colnames(cjb111_annot)[3] <- "start"
+colnames(cjb111_annot)[6] <- "strand"
+cjb111_annot[, c(19, 21)] <- NULL
+```
+
+## Strain vr2603
+
+I think this might actually be 2603vr, I get confused, and under a few specific
+circumstances R acts strange when things start with numbers.
+
+```{r annotation_2603vr}
+vr2603_microbes <- load_microbesonline_annotations(species="2603V")
+vr2603_gff <- load_gff_annotations("reference/sagalactiae_2603vr.gff")
+vr2603_microbes <- as.data.frame(vr2603_microbes)
+rownames(vr2603_gff) <- make.names(vr2603_gff[["locus_tag"]], unique=TRUE)
+## I am going to only pay attention to the first annotation for each locus tag from microbesonline.
+vr2603_microbes[["sysName"]] <- make.names(vr2603_microbes[["sysName"]], unique=TRUE)
+vr2603_annot <- merge(vr2603_gff, vr2603_microbes, by.x="locus_tag", by.y="sysName")
+rownames(vr2603_annot) <- make.names(vr2603_annot[["ID"]], unique=TRUE)
+## Rename the merged start/strand columns
+colnames(vr2603_annot)[3] <- "start"
+colnames(vr2603_annot)[6] <- "strand"
+vr2603_annot[, c(33, 35)] <- NULL
+```
+
+# Create Expressionsets
+
+The following block merges the various counts, annotations, and experimental
+metadata.
+
+Just as with the annotations, I will create one expressionset for each strain.
+
+## Strain a909
+
+```{r a909_expt, fig.show="hide"}
+a909_expt <- create_expt(metadata="sample_sheets/sagalacticae_samples.xlsx",
+                         batch=FALSE, gene_info=a909_annot, file_column="a909_filename")
+a909_written <- write_expt(a909_expt,
+                           excel=glue::glue("excel/{rundate}-a909_counts-v{ver}.xlsx"))
+```
+
+## Strain cjb111
+
+```{r cjb111_expt, fig.show="hide"}
+cjb111_expt <- create_expt(metadata="sample_sheets/sagalacticae_samples.xlsx",
+                           gene_info=cjb111_annot, file_column="cjb111_filename")
+cjb111_written <- write_expt(cjb111_expt,
+                             excel=glue::glue("excel/{rundate}-cjb111_counts-v{ver}.xlsx"))
+```
+
+## Strain 2603vr
+
+```{r vr2603_expt, fig.show="hide"}
+vr2603_expt <- create_expt(metadata="sample_sheets/sagalacticae_samples.xlsx",
+                           gene_info=vr2603_annot, file_column="vr2603_filename")
+vr2603_written <- write_expt(vr2603_expt,
+                             excel=glue::glue("excel/{rundate}-vr2603_counts-v{ver}.xlsx"))
+```
+
+# A Few diagnostic plots
+
+## Strain A909
+
+```{r some_plots_a909}
+a909_written[["legend_plot"]]
+a909_written[["raw_libsize"]]
+a909_written[["raw_density"]]
+## awesome
+
+a909_written[["norm_disheat"]]
+a909_written[["norm_corheat"]]
+a909_written[["norm_pca"]]
+```
+
+## Strain CJB111
+
+```{r some_plots_cjb111}
+cjb111_written[["raw_libsize"]]
+cjb111_written[["raw_density"]]
+## awesome
+
+cjb111_written[["norm_disheat"]]
+cjb111_written[["norm_corheat"]]
+cjb111_written[["norm_pca"]]
+```
+
+## Strain 2603V/R
+
+```{r some_plots_cjb111v2}
+vr2603_written[["raw_libsize"]]
+vr2603_written[["raw_density"]]
+## awesome
+
+vr2603_written[["norm_disheat"]]
+vr2603_written[["norm_corheat"]]
+vr2603_written[["norm_pca"]]
+```
+
+I think this looks reasonable, though it makes me slightly wonder if 04 and 09
+are switched. But as long as we are willing to state that the primary difference
+is between calprotectin and control, then I would suggest against considering
+it.  I think it is reasonable to assume the samples are not switched and this
+is just how they are.  If however, the primary goal is to investigate changing
+concentrations of calprotectin, then I would want to check into this
+distribution of samples or make the statement that these two concentrations have
+no significant difference unless we get more samples to look at.
+
+# Check tnseq saturation
+
+I moved this above the differential "expression"/"fitness" analysis so that we
+can add the results from it as annotation data to the DE tables if requested.
+
+```{r tnseq_saturation_a909, eval=FALSE}
+saturation_01 <- tnseq_saturation(
+  "preprocessing/01/outputs/essentiality_sagalactiae_a909/trimmed_ca-v0M1.wig",
+  adjust=2)
+saturation_01$plot
+saturation_01$hits_summary
+ess_plts <- plot_essentiality(
+  "preprocessing/01/outputs/essentiality_sagalactiae_a909/mh_ess-trimmed_ca-v0M1_gene_tas_m2.csv")
+ess_plts[["zbar"]]
+
+saturation_02 <- tnseq_saturation(
+  "preprocessing/02/outputs/essentiality_sagalactiae_a909/trimmed_ca-v0M1.wig")
+saturation_02$plot
+saturation_02$hits_summary
+ess_plts <- plot_essentiality(
+  "preprocessing/02/outputs/essentiality_sagalactiae_a909/mh_ess-trimmed_ca-v0M1_gene_tas_m2.csv")
+ess_plts[["zbar"]]
+
+saturation_03 <- tnseq_saturation(
+  "preprocessing/03/outputs/essentiality_sagalactiae_a909/trimmed_ca-v0M1.wig")
+saturation_03$plot
+saturation_03$hits_summary
+ess_plts <- plot_essentiality(
+  "preprocessing/03/outputs/essentiality_sagalactiae_a909/mh_ess-trimmed_ca-v0M1_gene_tas_m2.csv")
+ess_plts[["zbar"]]
+
+saturation_04 <- tnseq_saturation(
+  "preprocessing/04/outputs/essentiality_sagalactiae_a909/trimmed_ca-v0M1.wig")
+saturation_04$plot
+saturation_04$hits_summary
+ess_plts <- plot_essentiality(
+  "preprocessing/04/outputs/essentiality_sagalactiae_a909/mh_ess-trimmed_ca-v0M1_gene_tas_m2.csv")
+ess_plts[["zbar"]]
+
+saturation_05 <- tnseq_saturation(
+  "preprocessing/05/outputs/essentiality_sagalactiae_a909/trimmed_ca-v0M1.wig")
+saturation_05$plot
+saturation_05$hits_summary
+ess_plts <- plot_essentiality(
+  "preprocessing/06/outputs/essentiality_sagalactiae_a909/mh_ess-trimmed_ca-v0M1_gene_tas_m2.csv")
+ess_plts[["zbar"]]
+
+saturation_06 <- tnseq_saturation(
+  "preprocessing/06/outputs/essentiality_sagalactiae_a909/trimmed_ca-v0M1.wig")
+saturation_06$plot
+saturation_06$hits_summary
+ess_plts <- plot_essentiality(
+  "preprocessing/06/outputs/essentiality_sagalactiae_a909/mh_ess-trimmed_ca-v0M1_gene_tas_m2.csv")
+ess_plts[["zbar"]]
+
+saturation_07 <- tnseq_saturation(
+  "preprocessing/07/outputs/essentiality_sagalactiae_a909/trimmed_ca-v0M1.wig")
+saturation_07$plot
+saturation_07$hits_summary
+ess_plts <- plot_essentiality(
+  "preprocessing/07/outputs/essentiality_sagalactiae_a909/mh_ess-trimmed_ca-v0M1_gene_tas_m2.csv")
+ess_plts[["zbar"]]
+
+saturation_08 <- tnseq_saturation(
+  "preprocessing/08/outputs/essentiality_sagalactiae_a909/trimmed_ca-v0M1.wig")
+saturation_08$plot
+saturation_08$hits_summary
+ess_plts <- plot_essentiality(
+  "preprocessing/08/outputs/essentiality_sagalactiae_a909/mh_ess-trimmed_ca-v0M1_gene_tas_m2.csv")
+ess_plts[["zbar"]]
+
+saturation_09 <- tnseq_saturation(
+  "preprocessing/09/outputs/essentiality_sagalactiae_a909/trimmed_ca-v0M1.wig")
+saturation_09$plot
+saturation_09$hits_summary
+ess_plts <- plot_essentiality(
+  "preprocessing/09/outputs/essentiality_sagalactiae_a909/mh_ess-trimmed_ca-v0M1_gene_tas_m2.csv")
+ess_plts[["zbar"]]
+
+
+saturation_control <- tnseq_saturation(
+  "preprocessing/combined_control/outputs/essentiality_sagalactiae_a909/trimmed_ca-v1m1.wig")
+saturation_control$plot
+ess_plts <- plot_essentiality(
+  "preprocessing/combined_control/outputs/essentiality_sagalactiae_a909/mh_ess-trimmed_ca-v1m1_gene_tas_m2.csv")
+ess_plts[["zbar"]]
+```
+
+```{r tnseq_cjb111_plot}
+plt <- tnseq_multi_saturation(meta=pData(cjb111_expt), meta_column="cjb111esswig")
+plt[["plot"]] + ggplot2::scale_y_continuous(limits=c(0, 12000))
+## I expect the saturation of this to be a bit better than 2603V/R.
+
+plt <- tnseq_multi_saturation(meta=pData(vr2603_expt), meta_column="vr2603esswig")
+plt[["plot"]] + ggplot2::scale_y_continuous(limits=c(0, 12000))
+## hmm this is not definitive.  It looks like cjb111 has more TAs with ~ 1 hit.
+## but R/V has more hits with ~ 16<x<64 hits.
+
+plt <- tnseq_multi_saturation(meta=pData(a909_expt), meta_column="a909esswig")
+plt[["plot"]] + ggplot2::scale_y_continuous(limits=c(0, 20000))
+## I am not quite sure how to interpret this one, we have much more discrete
+## numbers of reads than the others.
+```
+
+# Changed genes
+
+For differential expression, I am going to assume until I hear otherwise, that
+my batch assignments are not correct and that the 1,2,3 assignments of the
+sample names do not actually delineate separate batches.  Though, if they _do_
+delineate separate batches, it might be taken as a (very)small degree of evidence that
+04 and 09 were switched.
+
+## Strain a909
+
+```{r de_a909}
+combined_essentiality <- list(
+  "control" = "preprocessing/combined_control/outputs/essentiality_sagalactiae_a909/mh_ess-trimmed_ca-v1m1_gene_tas_m2.csv",
+  "low" = "preprocessing/combined_low/outputs/essentiality_sagalactiae_a909/mh_ess-trimmed_ca-v1m1_gene_tas_m2.csv",
+  "high" = "preprocessing/combined_high/outputs/essentiality_sagalactiae_a909/mh_ess-trimmed_ca-v1m1_gene_tas_m2.csv")
+ess_table <- data.frame()
+for (f in 1:length(combined_essentiality)) {
+  name <- names(combined_essentiality)[f]
+  column_names <- c("orf", "k", "n", "r", "s", "zbar", "call")
+  names <- paste0(name, "_", column_names)
+  r <- readr::read_tsv(combined_essentiality[[f]], comment="#", col_names=names)
+  colnames(r)[1] <- "orf"
+  if (f == 1) {
+    ess_table <- r
+  } else {
+    ess_table <- merge(ess_table, r, by="orf")
+  }
+}
+rownames(ess_table) <- gsub(x=ess_table[["orf"]], pattern="^cds_", replacement="")
+ess_table[["orf"]] <- NULL
+
+a909_de <- all_pairwise(a909_expt, model_batch=FALSE, parallel=FALSE)
+a909_contrasts <- list(
+  "low_vs_control" = c("cal_low", "control"),
+  "high_vs_control" = c("cal_high", "control"))
+a909_tables <- combine_de_tables(
+  extra_annot=ess_table,
+  a909_de, keepers=a909_contrasts,
+  excel=glue::glue("excel/{rundate}-a909_tables-v{ver}.xlsx"))
+##a909_sig <- extract_significant_genes(
+##  a909_tables,
+##  excel=glue::glue("excel/a909_sig-v{ver}.xlsx"))
+```
+
+## Strain 2603V/R
+
+```{r de_2603vr}
+vr2603_de <- all_pairwise(vr2603_expt, model_batch=FALSE, parallel=FALSE)
+vr2603_tables <- combine_de_tables(
+  vr2603_de, keepers=a909_contrasts,
+  excel=glue::glue("excel/{rundate}-vr2603_tables-v{ver}.xlsx"))
+##vr2630_sig <- extract_significant_genes(
+##  vr2603_tables,
+##  excel=glue::glue("excel/{rundate}-vr2603_sig-v{ver}.xlsx"))
+```
+
+## Strain CJB111
+
+```{r de_cjb111}
+cjb111_de <- all_pairwise(cjb111_expt, model_batch=FALSE, parallel=FALSE)
+cjb111_tables <- combine_de_tables(
+  cjb111_de, keepers=a909_contrasts,
+  excel=glue::glue("excel/{rundate}-cjb111_tables-v{ver}.xlsx"))
+##cjb111_sig <- extract_significant_genes(
+##  a909_tables,
+##  excel=glue::glue("excel/{rundate}-cjb111_sig-v{ver}.xlsx"))
+```
+
+# Circos
+
+```{r circos}
+## Because I did not properly clean up my merges.
+annot <- a909_annot
+
+## For pretty plus/minus plots
+go_table <- annot[, c("start", "end", "strand", "COGFun")]
+colnames(go_table) <- c("start", "stop", "strand", "COGFun")
+go_table[["go"]] <- ""
+
+ess_circos <- ess_table[, c("control_call", "low_call", "high_call")] %>%
+  dplyr::mutate(control_num = dplyr::case_when(
+           control_call == "E" ~ 2,
+           control_call == "NE" ~ 0,
+           control_call == "S" ~ -1,
+           control_call == "U" ~ 1),
+         low_num = dplyr::case_when(
+           low_call == "E" ~ 2,
+           low_call == "NE" ~ 0,
+           low_call == "S" ~ -1,
+           low_call == "U" ~ 1),
+         high_num = dplyr::case_when(
+           high_call == "E" ~ 2,
+           high_call == "NE" ~ 0,
+           high_call == "S" ~ -1,
+           high_call == "U" ~ 1))
+ess_circos[["control_call"]] <- as.factor(ess_circos[["control_call"]])
+ess_circos[["low_call"]] <- as.factor(ess_circos[["low_call"]])
+ess_circos[["high_call"]] <- as.factor(ess_circos[["high_call"]])
+rownames(ess_circos) <- rownames(ess_table)
+colors <- c("990000", "008800", "000000", "0000AA")
+names(colors) <- c("E", "NE", "S", "U")
+
+circos_cfg <- circos_prefix("a909")
+a909_kary <- circos_karyotype(name="a909", fasta="reference/sagalactiae_a909.fasta")
+a909_plus_minus <- circos_plus_minus(go_table, cfgout=circos_cfg, width=0.04)
+low_df <- a909_tables[["data"]][["low_vs_control"]]
+a909_low <- circos_hist(a909_tables[["data"]][["low_vs_control"]], cfgout=circos_cfg,
+                        annot_df=annot, colname="deseq_logfc", basename="low",
+                        outer=a909_plus_minus, fill_color="blue", width=0.04)
+a909_high <- circos_hist(a909_tables[["data"]][["high_vs_control"]], cfgout=circos_cfg,
+                         annot_df=annot, colname="deseq_logfc", basename="high",
+                         outer=a909_low, fill_color="green", width=0.04)
+a909_control_tile <- circos_tile(ess_circos,
+                                 annot_df=annot, cfgout=circos_cfg,
+                                 colname="control_call",
+                                 colors=colors,
+                                 basename="control_tile",
+                                 outer=a909_high, width=0.04)
+a909_low_tile <- circos_tile(ess_circos,
+                             annot_df=annot, cfgout=circos_cfg,
+                             colname="low_call",
+                             colors=colors,
+                             basename="low_tile",
+                             outer=a909_control_tile, width=0.04)
+a909_high_tile <- circos_tile(ess_circos,
+                             annot_df=annot, cfgout=circos_cfg,
+                             colname="high_call",
+                             colors=colors,
+                             basename="high_tile",
+                             outer=a909_low_tile, width=0.04)
+a909_suffix <- circos_suffix(circos_cfg)
+made <- circos_make("a909")
+```
+
+# Circos email conversation
+
+Here is (most of) the text of a recent email from Kevin:
+
+"
+I think a plot of the following might be the best for the paper.  It would just
+remove the 2 Bayesians of the high and low, and add the mapping of the
+transposon (krait) to the genome:
+
+1.  + Strand ORFs (COG colored)
+2.  -  Strand ORFs (COG colored)
+3.  + Strand Krmit insertions
+4.  -  Strand Krmit insertions
+5.  DESeq2 low/control samples
+6.  DESeq2 high/control samples
+7.  DeJesus Bayesian result for control sample only combined.
+
+That way we can see the coverage of the Krmit insertions and only the Bayesian
+in control conditions (broadly essential).
+"
+
+I am thinking that this is not a problem, but I will probably do 3 and 4 as 3
+rings, one each for the +/- strand control/low/high samples.
+
+In another hallway query, Kevin suggested rpkm of the control/low/high 'master'
+libraries.
+
+ ergo...
+
+```{r circosv2}
+combined_expt <- create_expt("sample_sheets/sagalactiae_combined_samples.xlsx",
+                             gene_info=a909_annot)
+combined_norm <- normalize_expt(combined_expt, convert="rpkm",
+                                transform="log2", na_to_zero=TRUE)
+combined_exprs <- exprs(combined_norm)
+
+circosv2_cfg <- circos_prefix("a909v2")
+a909_kary <- circos_karyotype(name="a909v2", fasta="reference/sagalactiae_a909.fasta")
+a909_plus_minus <- circos_plus_minus(go_table, cfgout=circosv2_cfg,
+                                     width=0.05, spacing=0.01, thickness=75)
+a909_control_rpkm <- circos_hist(combined_exprs, cfgout=circosv2_cfg,
+                                 width=0.05, spacing=0.01,
+                                 annot_df=annot, colname="control", basename="control_rpkm",
+                                 outer=a909_plus_minus, fill_color="vdpblue")
+a909_low_rpkm <- circos_hist(combined_exprs, cfgout=circosv2_cfg,
+                             width=0.05, spacing=0.01,
+                             annot_df=annot, colname="low", basename="low_rpkm",
+                             outer=a909_control_rpkm, fill_color="dpblue")
+a909_high_rpkm <- circos_hist(combined_exprs, cfgout=circosv2_cfg,
+                              width=0.05, spacing=0.01,
+                             annot_df=annot, colname="high", basename="high_rpkm",
+                             outer=a909_low_rpkm, fill_color="blue")
+a909_control_tile <- circos_tile(ess_circos, annot_df=annot, cfgout=circosv2_cfg,
+                                 width=0.06, padding=0,
+                                 colname="control_call", colors=colors, basename="control_tile",
+                                 outer=a909_high_rpkm)
+a909_low_tile <- circos_tile(ess_circos, annot_df=annot, cfgout=circosv2_cfg,
+                             width=0.06, padding=0,
+                             colname="low_call", colors=colors, basename="low_tile",
+                             outer=a909_control_tile)
+a909_high_tile <- circos_tile(ess_circos, annot_df=annot, cfgout=circosv2_cfg,
+                              width=0.06, padding=0,
+                              colname="high_call", colors=colors, basename="high_tile",
+                              outer=a909_low_tile)
+a909_low <- circos_hist(a909_tables[["data"]][["low_vs_control"]], cfgout=circosv2_cfg,
+                        width=0.06, spacing=0.0,
+                        annot_df=annot, colname="deseq_logfc", basename="low",
+                        outer=a909_high_tile, fill_color="vvdpgreen")
+a909_high <- circos_hist(a909_tables[["data"]][["high_vs_control"]], cfgout=circosv2_cfg,
+                         width=0.06, spacing=0.0,
+                         annot_df=annot, colname="deseq_logfc", basename="high",
+                         outer=a909_low, fill_color="vdpgreen")
+a909_suffix <- circos_suffix(circosv2_cfg)
+made <- circos_make("a909v2")
+```
+
+
+```{r circosv3}
+circosv3_cfg <- circos_prefix("a909v3")
+a909_kary <- circos_karyotype(name="a909v3", fasta="reference/sagalactiae_a909.fasta")
+a909_plus_minus <- circos_plus_minus(go_table, cfgout=circosv3_cfg,
+                                     width=0.05, spacing=0.01, thickness=75)
+a909_control_rpkm <- circos_hist(combined_exprs, cfgout=circosv3_cfg,
+                                 width=0.05, spacing=0.01,
+                                 annot_df=annot, colname="control", basename="control_rpkm",
+                                 outer=a909_plus_minus, fill_color="vdpblue")
+a909_low_rpkm <- circos_hist(combined_exprs, cfgout=circosv3_cfg,
+                             width=0.05, spacing=0.01,
+                             annot_df=annot, colname="low", basename="low_rpkm",
+                             outer=a909_control_rpkm, fill_color="dpblue")
+a909_high_rpkm <- circos_hist(combined_exprs, cfgout=circosv3_cfg,
+                              width=0.05, spacing=0.01,
+                             annot_df=annot, colname="high", basename="high_rpkm",
+                             outer=a909_low_rpkm, fill_color="blue")
+a909_low <- circos_hist(a909_tables[["data"]][["low_vs_control"]], cfgout=circosv3_cfg,
+                        width=0.06, spacing=0.0,
+                        annot_df=annot, colname="deseq_logfc", basename="low",
+                        outer=a909_high_rpkm, fill_color="vvdpgreen")
+a909_high <- circos_hist(a909_tables[["data"]][["high_vs_control"]], cfgout=circosv3_cfg,
+                         width=0.06, spacing=0.0,
+                         annot_df=annot, colname="deseq_logfc", basename="high",
+                         outer=a909_low, fill_color="vdpgreen")
+a909_suffix <- circos_suffix(circosv3_cfg)
+made <- circos_make("a909v3")
+```
+
+```{r circosv4}
+combined_expt <- create_expt("sample_sheets/sagalactiae_combined_samples.xlsx",
+                             gene_info=a909_annot)
+combined_norm <- normalize_expt(combined_expt, convert="rpkm",
+                                transform="log2", na_to_zero=TRUE)
+combined_exprs <- exprs(combined_norm)
+
+circosv4_cfg <- circos_prefix("a909v4")
+a909_kary <- circos_karyotype(name="a909v4", fasta="reference/sagalactiae_a909.fasta")
+a909_plus_minus <- circos_plus_minus(go_table, cfgout=circosv4_cfg,
+                                     width=0.05, spacing=0.01, thickness=75)
+a909_control_rpkm <- circos_hist(combined_exprs, cfgout=circosv4_cfg,
+                                 width=0.05, spacing=0.01,
+                                 annot_df=annot, colname="control", basename="control_rpkm",
+                                 outer=a909_plus_minus, fill_color="vdpblue")
+a909_low_rpkm <- circos_hist(combined_exprs, cfgout=circosv4_cfg,
+                             width=0.05, spacing=0.01,
+                             annot_df=annot, colname="low", basename="low_rpkm",
+                             outer=a909_control_rpkm, fill_color="dpblue")
+a909_high_rpkm <- circos_hist(combined_exprs, cfgout=circosv4_cfg,
+                              width=0.05, spacing=0.01,
+                             annot_df=annot, colname="high", basename="high_rpkm",
+                             outer=a909_low_rpkm, fill_color="blue")
+a909_control_tile <- circos_tile(ess_circos, annot_df=annot, cfgout=circosv4_cfg,
+                                 width=0.06, padding=0,
+                                 colname="control_call", colors=colors, basename="control_tile",
+                                 outer=a909_high_rpkm)
+a909_low_tile <- circos_tile(ess_circos, annot_df=annot, cfgout=circosv4_cfg,
+                             width=0.06, padding=0,
+                             colname="low_call", colors=colors, basename="low_tile",
+                             outer=a909_control_tile)
+a909_high_tile <- circos_tile(ess_circos, annot_df=annot, cfgout=circosv4_cfg,
+                              width=0.06, padding=0,
+                              colname="high_call", colors=colors, basename="high_tile",
+                              outer=a909_low_tile)
+a909_suffix <- circos_suffix(circosv4_cfg)
+made <- circos_make("a909v4")
+```
+
+
+```{r saveme, eval=FALSE}
+pander::pander(sessionInfo())
+message(paste0("This is hpgltools commit: ", get_git_commit()))
+this_save <- paste0(gsub(pattern="\\.Rmd", replace="", x=rmd_file), "-v", ver, ".rda.xz")
+message(paste0("Saving to ", this_save))
+tmp <- sm(saveme(filename=this_save))
+```
